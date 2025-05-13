@@ -15,10 +15,11 @@ dotenv.config()
 const app=express();
 
 app.use(express.json())
-// app.use(cors())
 app.use(cors({
     origin: ['http://localhost:5173', 'https://csa-client-zeta.vercel.app'],
-    credentials: true
+    credentials: true,
+    // methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    // allowedHeaders: ['Content-Type', 'token']
 }));
 
 const {userRouter}= require ("./routes/user.js")
