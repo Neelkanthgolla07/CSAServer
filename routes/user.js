@@ -7,7 +7,7 @@ const jwt=require("jsonwebtoken");
 
 const {JWT_USER_PASSWORD}= require("../config")
 
-const {userModel,purchaseModel} = require("../db")
+const {userModel,purchaseModel,courseModel} = require("../db")
 
 const userRouter =Router();
 
@@ -121,13 +121,29 @@ userRouter.post("/signin", async function(req, res) {
 userRouter.get("/purchases",userAuth,async function(req,res){
     const userId = req.userId;
 
-    const purchases = await purchaseModel.find({
+    try {
+        // Get all purchases for the user
+        const purchases = await purchaseModel.find({
             userId
-    })
+        });
 
-    res.json({
-            purchases
-    })
+        // Get unique course IDs to avoid duplicates
+        const uniqueCourseIds = [...new Set(purchases.map(purchase => purchase.courseId.toString()))];
+
+        // Fetch full course details for unique courses
+        const courses = await courseModel.find({
+            _id: { $in: uniqueCourseIds }
+        });
+
+        res.json({
+            purchases: courses
+        });
+    } catch (error) {
+        console.error('Error fetching purchases:', error);
+        res.status(500).json({
+            message: "Error fetching purchases"
+        });
+    }
 })
 
 
